@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f5f7" />
+  <title>测试任务便签</title>
+  <style>
+    :root{
+      --bg:#f5f5f7;--card:rgba(255,255,255,.82);--text:#1d1d1f;--muted:#6e6e73;
+      --line:rgba(0,0,0,.08);--accent:#0071e3;--accent2:#2997ff;--danger:#ff3b30;
+      --shadow:0 18px 50px rgba(0,0,0,.08);--radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+      background:
+        radial-gradient(circle at 15% 0%,rgba(0,113,227,.10),transparent 28rem),
+        radial-gradient(circle at 95% 15%,rgba(175,82,222,.09),transparent 26rem),
+        var(--bg);
+    }
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .shell{width:min(860px,calc(100% - 28px));margin:0 auto;padding:56px 0 84px}
+    .hero{margin-bottom:24px}
+    .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(34px,7vw,56px);line-height:1.02;letter-spacing:-.045em;margin:10px 0 12px}
+    .subtitle{margin:0;color:var(--muted);font-size:17px;line-height:1.6}
+    .panel{
+      background:var(--card);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+      border:1px solid rgba(255,255,255,.72);box-shadow:var(--shadow);border-radius:var(--radius);
+      overflow:hidden;
+    }
+    .composer{display:flex;gap:10px;padding:14px;border-bottom:1px solid var(--line)}
+    .composer input{
+      flex:1;min-width:0;border:0;outline:0;background:#fff;border-radius:16px;
+      padding:15px 16px;font-size:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
+    }
+    .composer input:focus{box-shadow:0 0 0 4px rgba(0,113,227,.13),inset 0 0 0 1px rgba(0,113,227,.35)}
+    .primary{
+      border:0;color:#fff;background:linear-gradient(180deg,var(--accent2),var(--accent));
+      border-radius:16px;padding:0 19px;font-weight:700;min-height:50px;
+      box-shadow:0 8px 18px rgba(0,113,227,.20)
+    }
+    .toolbar{
+      min-height:58px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
+      gap:12px;border-bottom:1px solid var(--line);color:var(--muted);font-size:13px
+    }
+    .filters{display:flex;gap:6px;flex-wrap:wrap}
+    .filter{
+      border:0;background:transparent;color:var(--muted);border-radius:999px;padding:8px 11px;font-weight:650
+    }
+    .filter.active{background:#fff;color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.07)}
+    .clear{
+      border:0;background:transparent;color:var(--muted);padding:8px 6px;border-radius:10px
+    }
+    .clear:hover{color:var(--danger);background:rgba(255,59,48,.07)}
+    .list{list-style:none;margin:0;padding:7px}
+    .task{
+      display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
+      padding:13px 12px;border-radius:17px;transition:.18s ease
+    }
+    .task:hover{background:rgba(0,0,0,.025)}
+    .check{
+      width:24px;height:24px;border-radius:50%;border:2px solid #c7c7cc;background:#fff;
+      display:grid;place-items:center;transition:.18s ease;padding:0
+    }
+    .check svg{width:14px;height:14px;opacity:0;transform:scale(.7);transition:.18s ease}
+    .task.done .check{border-color:var(--accent);background:var(--accent);color:#fff}
+    .task.done .check svg{opacity:1;transform:scale(1)}
+    .taskText{font-size:16px;line-height:1.45;word-break:break-word;padding:4px 0}
+    .task.done .taskText{text-decoration:line-through;color:#9a9aa0}
+    .delete{
+      width:34px;height:34px;border:0;border-radius:11px;background:transparent;color:#a1a1a6;
+      font-size:20px;display:grid;place-items:center;opacity:.55
+    }
+    .task:hover .delete{opacity:1}
+    .delete:hover{background:rgba(255,59,48,.08);color:var(--danger)}
+    .empty{text-align:center;padding:58px 24px 64px;color:var(--muted)}
+    .emptyIcon{width:54px;height:54px;border-radius:17px;background:#fff;display:grid;place-items:center;margin:0 auto 13px;box-shadow:0 8px 20px rgba(0,0,0,.05);font-size:25px}
+    .empty strong{display:block;color:var(--text);font-size:17px;margin-bottom:6px}
+    .footer{text-align:center;color:#9a9aa0;font-size:12px;margin-top:16px}
+    .kbd{padding:2px 6px;background:rgba(0,0,0,.05);border-radius:6px}
+    @media(max-width:600px){
+      .shell{padding-top:32px}
+      .composer{display:grid;grid-template-columns:1fr auto}
+      .primary{padding:0 16px}
+      .toolbar{align-items:flex-start;flex-direction:column}
+      .clear{align-self:flex-end;margin-top:-42px}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Quick Notes</div>
+      <h1>测试任务便签</h1>
+      <p class="subtitle">想起来就记下来。轻一点，快一点，不让小事占住脑子。</p>
+    </section>
+
+    <section class="panel">
+      <form class="composer" id="composer">
+        <input id="taskInput" autocomplete="off" maxlength="180" placeholder="现在要记住什么？" aria-label="输入任务" />
+        <button class="primary" type="submit">添加</button>
+      </form>
+
+      <div class="toolbar">
+        <div class="filters" role="tablist" aria-label="筛选任务">
+          <button class="filter active" data-filter="all" type="button">全部 <span id="allCount">0</span></button>
+          <button class="filter" data-filter="active" type="button">待办 <span id="activeCount">0</span></button>
+          <button class="filter" data-filter="done" type="button">完成 <span id="doneCount">0</span></button>
+        </div>
+        <button id="clearDone" class="clear" type="button">清除已完成</button>
+      </div>
+
+      <ul id="taskList" class="list"></ul>
+      <div id="empty" class="empty" hidden>
+        <div class="emptyIcon">✓</div>
+        <strong id="emptyTitle">还没有便签</strong>
+        <div id="emptyHint">在上面写下一件事，然后按回车。</div>
+      </div>
+    </section>
+    <div class="footer">数据仅保存在当前浏览器 · <span class="kbd">Enter</span> 快速添加</div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'test-task-notes-v1';
+    const input = document.getElementById('taskInput');
+    const list = document.getElementById('taskList');
+    const empty = document.getElementById('empty');
+    const emptyTitle = document.getElementById('emptyTitle');
+    const emptyHint = document.getElementById('emptyHint');
+    const allCount = document.getElementById('allCount');
+    const activeCount = document.getElementById('activeCount');
+    const doneCount = document.getElementById('doneCount');
+    const filters = [...document.querySelectorAll('.filter')];
+    let currentFilter = 'all';
+
+    let tasks = load();
+
+    function load(){
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function escapeHTML(value){
+      return value.replace(/[&<>"']/g, ch => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      })[ch]);
+    }
+
+    function visibleTasks(){
+      if(currentFilter === 'active') return tasks.filter(t => !t.done);
+      if(currentFilter === 'done') return tasks.filter(t => t.done);
+      return tasks;
+    }
+
+    function render(){
+      const visible = visibleTasks();
+      list.innerHTML = visible.map(task => `
+        <li class="task ${task.done ? 'done' : ''}" data-id="${task.id}">
+          <button class="check" type="button" aria-label="${task.done ? '标记为待办' : '标记完成'}">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12.5l4.2 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="taskText">${escapeHTML(task.text)}</div>
+          <button class="delete" type="button" aria-label="删除">×</button>
+        </li>
+      `).join('');
+
+      const active = tasks.filter(t => !t.done).length;
+      const done = tasks.length - active;
+      allCount.textContent = tasks.length;
+      activeCount.textContent = active;
+      doneCount.textContent = done;
+
+      empty.hidden = visible.length > 0;
+      list.hidden = visible.length === 0;
+      if(visible.length === 0){
+        if(tasks.length === 0){
+          emptyTitle.textContent = '还没有便签';
+          emptyHint.textContent = '在上面写下一件事，然后按回车。';
+        }else if(currentFilter === 'active'){
+          emptyTitle.textContent = '待办已经清空';
+          emptyHint.textContent = '不错，暂时没有未完成的事情。';
+        }else{
+          emptyTitle.textContent = '还没有完成项';
+          emptyHint.textContent = '完成一件事后，它会出现在这里。';
+        }
+      }
+
+      filters.forEach(btn => btn.classList.toggle('active', btn.dataset.filter === currentFilter));
+    }
+
+    document.getElementById('composer').addEventListener('submit', event => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if(!text) return input.focus();
+      tasks.unshift({id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), text, done:false, createdAt:Date.now()});
+      input.value = '';
+      currentFilter = 'all';
+      save();
+      render();
+      input.focus();
+    });
+
+    list.addEventListener('click', event => {
+      const row = event.target.closest('.task');
+      if(!row) return;
+      const index = tasks.findIndex(t => t.id === row.dataset.id);
+      if(index < 0) return;
+
+      if(event.target.closest('.check')){
+        tasks[index].done = !tasks[index].done;
+      }else if(event.target.closest('.delete')){
+        tasks.splice(index, 1);
+      }else{
+        return;
+      }
+      save();
+      render();
+    });
+
+    filters.forEach(btn => btn.addEventListener('click', () => {
+      currentFilter = btn.dataset.filter;
+      render();
+    }));
+
+    document.getElementById('clearDone').addEventListener('click', () => {
+      if(!tasks.some(t => t.done)) return;
+      tasks = tasks.filter(t => !t.done);
+      save();
+      render();
+    });
+
+    render();
+    input.focus();
+  </script>
+</body>
+</html>
